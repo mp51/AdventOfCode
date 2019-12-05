@@ -1,20 +1,34 @@
 from collections import namedtuple
+from enum import IntEnum
 import copy
+import sys
 
 # Instruction = namedtuple("Instruction", "op_code params")
 Param = namedtuple("Param", "value mode")
 
+class Operation(IntEnum):
+   ADD = 1
+   MULT = 2
+   INPUT = 3
+   OUTPUT = 4
+   JUMP_IF_TRUE = 5
+   JUMP_IF_FALSE = 6
+   LESS_THAN = 7
+   EQUALS = 8
+   
+   TERMINATE = 99
+
 class Instruction:
    operations = {
-      1: "Addition",
-      2: "Multiplication",
-      3: "Input",
-      4: "Output",
-      5: "Jump-if-true",
-      6: "Jump-if-false",
-      7: "Less-than",   
-      8: "Equals",
-      99: "Terminate"
+      Operation.ADD: "Addition",
+      Operation.MULT: "Multiplication",
+      Operation.INPUT: "Input",
+      Operation.OUTPUT: "Output",
+      Operation.JUMP_IF_TRUE: "Jump-if-true",
+      Operation.JUMP_IF_FALSE: "Jump-if-false",
+      Operation.LESS_THAN: "Less-than",   
+      Operation.EQUALS: "Equals",
+      Operation.TERMINATE: "Terminate"
    }
 
    def __init__(self, int_code):
@@ -29,13 +43,19 @@ class Instruction:
          digits.insert(0, 0)
 
       self.op_code = digits[-2]*10 + digits[-1]
+      self.operation = Operation(self.op_code)
       self.params_modes = (digits[2], digits[1], digits[0])
 
-      if self.op_code in (1, 2, 7, 8):
+      if self.op_code in (Operation.ADD, 
+                          Operation.MULT, 
+                          Operation.LESS_THAN, 
+                          Operation.EQUALS):
          self.params_count = 3
-      elif self.op_code in (3, 4):
+      elif self.op_code in (Operation.INPUT, 
+                            Operation.OUTPUT):
          self.params_count = 1
-      elif self.op_code in (5, 6):
+      elif self.op_code in (Operation.JUMP_IF_TRUE, 
+                            Operation.JUMP_IF_FALSE):
          self.params_count = 2
       else:
          self.params_count = 0
@@ -106,12 +126,15 @@ class Computer:
 
 
 
-initial_memory = [int(i) for i in input().split(',')]
+if len(sys.argv) < 2:
+   print("No input argument, aborting...")
+   exit()
 
-input_value = 5
+input_value = int(sys.argv[1])
+print("Input argument:", input_value)
+
+initial_memory = [int(i) for i in input().split(',')]
 
 computer = Computer(initial_memory, input_value)
 result = computer.compute_result()
 print("result:", result)
-
-
